@@ -1,3 +1,6 @@
+from math import sqrt
+
+
 class Vector:
     def __init__(self, x, y):
         self.x = x
@@ -45,3 +48,6 @@ class Vector:
             return self.y
         else:
             raise IndexError('Faut pas pousser mémé là...')
+
+    def norm(self):
+        return sqrt(self.x**2 + self.y**2)

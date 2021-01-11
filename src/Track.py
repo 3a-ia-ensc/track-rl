@@ -7,7 +7,7 @@ from src.Vector import Vector
 
 
 class Track:
-    def __init__(self, path, startPos, finishA, finishB, checkPointA, checkPointB):
+    def __init__(self, path, startPos, finishA, finishB, checkPointA, checkPointB, checkPointC, checkPointD):
         self._track = self._load(path)
         self._finishVector = finishB - finishA
         self.finishA = finishA
@@ -17,14 +17,16 @@ class Track:
         self.checkPointB = checkPointB
 
         self._finishLine = bresenham(finishA, finishB)
-        self._checkpointLine = bresenham(checkPointA, checkPointB)
+        self._checkpointLine1 = bresenham(checkPointA, checkPointB)
+        self._checkpointLine2 = bresenham(checkPointC, checkPointD)
 
         self._startPos = startPos
         self.car = CarAgent(startPos)
-        self._checkpointCrossed = False
+        self._checkpointCrossed = [False, False]
+        self._counter = 0
 
     def _load(self, path):
-        arr = np.sum(np.asarray(Image.open(path)), axis=2) != 255*3
+        arr = np.sum(np.asarray(Image.open(path)), axis=2) == 255 * 3
         return arr
 
     @property
@@ -44,40 +46,91 @@ class Track:
         return self.shape[0]
 
     def playAction(self, action):
+        self._counter += 1
         new_pos, new_speed = self.car.Move(action)
 
         end = False
         out, pts = self.outOfTrack(self.car.Pos, new_pos)
 
         if out:
-            r = -200
+            r = -100
             new_pos = pts
             new_speed = Vector(0, 0)
             #end = True
-        elif new_pos.x < 0 or new_pos.x >= self.width or new_pos.y < 0 or new_pos.y >= self.height:
-            new_pos = self.car.Pos
-            r = -500
+        elif self.crossedLine(self.car.Pos, new_pos, self._checkpointLine1) and not self._checkpointCrossed[0]:
+            r = 50
+            self._checkpointCrossed[0] = True
+            #print('C1')
+        elif self.crossedLine(self.car.Pos, new_pos, self._checkpointLine2) and self._checkpointCrossed[0] and not self._checkpointCrossed[1]:
+            r = 20
+            self._checkpointCrossed[1] = True
+            #print('C2')
+        elif self.crossedLine(self.car.Pos, new_pos, self._finishLine) and self._checkpointCrossed[0] and self._checkpointCrossed[1]:
+            r = 100
             end = True
-        elif self.crossedLine(self.car.Pos, new_pos, self._finishLine):
-            if self._checkpointCrossed:
-                r = 1000
-                end = True
-            else:
-                r = -1000
-        elif self.crossedLine(self.car.Pos, new_pos, self._checkpointLine):
-            r = 1
-            self._checkpointCrossed = True
+            print('FINISH')
+        elif new_pos in self.car._path:
+            r = -100
         else:
             r = -1
+
+        if self._counter > 85:
+            r = -1000
+            end = True
 
         if not end:
             self.car.ComputeMove(new_pos, new_speed)
 
         return coord2pos(new_pos, self.width), r, end
 
+
+    """def playAction(self, action):
+        self._counter += 1
+        new_pos, new_speed = self.car.Move(action)
+
+        end = False
+        out, pts = self.outOfTrack(self.car.Pos, new_pos)
+
+        if out:
+            r = -10
+            new_pos = pts
+            new_speed = Vector(0, 0)
+            # end = True
+        elif self.crossedLine(self.car.Pos, new_pos, self._finishLine):
+            if self._checkpointCrossed[0] and self._checkpointCrossed[1]:
+                r = 2000
+                end = True
+            else:
+                r = -2000
+        elif self.crossedLine(self.car.Pos, new_pos, self._checkpointLine1):
+            r = 20
+            self._checkpointCrossed[0] = True
+        elif self.crossedLine(self.car.Pos, new_pos, self._checkpointLine2):
+            r = 20
+            if self._checkpointCrossed[0]:
+                self._checkpointCrossed[1] = True
+        else:
+            if new_pos == self.car.Pos:
+                r = -100
+            else:
+                if new_speed.norm() > self.car.Pos.norm():
+                    r = -1
+                else:
+                    r = -2
+        if self._counter > 500:
+            r = -10
+            end = True
+
+        if not end:
+            self.car.ComputeMove(new_pos, new_speed)
+
+        return coord2pos(new_pos, self.width), r, end"""
+
     def reset(self):
         self.car.Reset(self._startPos)
-        self._checkpointCrossed = False
+        self._checkpointCrossed = [False, False]
+        self._counter = 0
+        return coord2pos(self._startPos, self.width)
 
     def crossedLine(self, ptsA, ptsB, line):
         pts = bresenham(ptsA, ptsB)
@@ -99,7 +152,6 @@ class Track:
                 last = p
 
         return False, ptsB
-
 
     def __getitem__(self, tup):
         line, col = tup

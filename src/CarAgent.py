@@ -28,9 +28,9 @@ class CarAgent:
     def ComputeMove(self, pos, speed):
         self._pos = pos
         self._speed = speed
+        self._path.append(pos)
 
     def Move(self, action):
-        #print(f'Action: {action}')
         pos = self._acceleration[action] + self._speed + self._pos
         speed = self._speed + self._acceleration[action] * self._power
         return pos, speed
