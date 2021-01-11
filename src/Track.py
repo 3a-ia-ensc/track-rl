@@ -89,7 +89,7 @@ class Track:
         new_pos, new_speed = self.car.Move(action)
 
         end = False
-        out, pts = self.outOfTrack(self.car.Pos, new_pos)
+        out, pts = self.outOfTrack(self.car.Pos, new_pos) 
 
         if out:
             r = -10
