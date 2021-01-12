@@ -1,7 +1,22 @@
+# -*- coding: utf-8 -*-
+
+""" Vector.py
+"""
+
+__author__ = "Simon Audrix and Gabriel Nativel-Fontaine"
+__credits__ = ["Simon Audrix", "Gabriel Nativel-Fontaine"]
+__copyright__ = "Copyright 2021, Apprentissage par renforcement"
+__version__ = "1.0.0"
+__email__ = "gnativ910e@ensc.fr"
+__status__ = "Development"
+
 from math import sqrt
 
 
 class Vector:
+    """ Objects used to manage Vectors
+
+    """
     def __init__(self, x, y):
         self.x = x
         self.y = y
