@@ -35,6 +35,10 @@ class CarAgent:
     def Pos(self):
         return self._pos
 
+    @property
+    def Path(self):
+        return self._path
+
     def Reset(self, pos):
         """ Reset the agent on a given position
 

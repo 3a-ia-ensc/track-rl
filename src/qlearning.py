@@ -21,13 +21,19 @@ class QLearning:
         self._track = track
 
         self._n_states = track.states
-        self._n_actions = len(track.actions)
+        self._n_actions = 9
+
+        self.epoch = 0
 
         self._Q = np.zeros((self._n_states, self._n_actions))
 
         self._list_actions = []
         self._list_states = []
         self._cumul_reward = []
+
+    @property
+    def MeanScore(self):
+        return round(sum(self._cumul_reward) / len(self._cumul_reward), 2)
 
     def run_episode(self):
         """ Run one episode of the Q-Learning algorithm
@@ -37,6 +43,8 @@ class QLearning:
         mem_actions = []
         mem_states = []
         mem_rewards = []
+
+        self.epoch += 1
 
         while not e:
             l = np.random.randn(1, self._n_actions)
@@ -54,6 +62,7 @@ class QLearning:
         self._list_actions.append(mem_actions)
         self._list_states.append(mem_states)
         self._cumul_reward.append(np.sum(mem_rewards))
+
 
     def simulate(self, n_episods):
         """ Run multiple episods of the algorithm

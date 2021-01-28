@@ -39,6 +39,8 @@ class Track:
         self._checkpointCrossed = [False, False]
         self._counter = 0
 
+        self.actions = []
+
     def _load(self, path):
         """ Load an image file representing a track in a np.array
 
